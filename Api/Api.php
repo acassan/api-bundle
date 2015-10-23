@@ -37,6 +37,9 @@ Class Api
 	public function __construct($endpoint)
 	{
 		$this->endpoint = $endpoint;
+
+		// TO REMOVE
+		$this->loadServices();
 	}
 
 	/**
@@ -72,16 +75,9 @@ Class Api
 	 * @return mixed|string
 	 * @throws \Exception
 	 */
-	public function call($url, array $parameters = [], $method = 'get', $raw = false)
+	public function call($url, array $parameters = [], $method = 'GET', $raw = false)
 	{
-		$allowedMethods = ['get','post','put','head','patch'];
-
-		if(!in_array($method, $allowedMethods)) {
-			throw new MethodNotAllowedException("Method '$method' not allowed ('".implode(',', $allowedMethods)."')");
-		}
-
 		if(preg_match("/\{([a-z0-9]+)\}/i", $url, $matches)) {
-
 			// Remove first element of matches
 			array_shift($matches);
 
@@ -95,8 +91,8 @@ Class Api
 		}
 
 		switch($method) {
-			case 'get':
-			case 'put':
+			case 'GET':
+			case 'PUT':
 				$urlParameters = [];
 				foreach($parameters as $paramName => $paramValue) { $urlParameters[] = sprintf("%s=%s", $paramName, urlencode($paramValue)); }
 				$url .= '?'.implode('&', $urlParameters);
@@ -108,7 +104,7 @@ Class Api
 		$responseContent 	= $response->getBody()->getContents();
 
 		if(!$raw) {
-			$responseContent = json_decode($responseContent);
+			$responseContent = json_decode($responseContent, true);
 		}
 
 		return $responseContent;
@@ -131,9 +127,7 @@ Class Api
 			throw new \Exception("Route $routeName not found in all services configuration");
 		}
 
-		$method = $this->findMethodInRoute($routeName);
-
-		return $this->call($this->servicesMethods[$routeName], $parameters, $method);
+		return $this->call($this->servicesMethods[$routeName]['url'], $parameters, $this->servicesMethods[$routeName]['method']);
 	}
 
 	/**
@@ -154,13 +148,14 @@ Class Api
 	{
 		$this->services = [];
 
-		foreach($this->getServices()->services as $serviceName => $serviceConfiguration) {
-			if(!isset($serviceConfiguration->endpoint)) { continue; }
+		foreach($this->getServices() as $serviceName => $serviceConfiguration) {
+			if(!isset($serviceConfiguration['endpoint'])) { continue; }
 
 			$this->services[$serviceName] = $serviceConfiguration;
 
-			foreach($serviceConfiguration->routes as $routeName => $routePath) {
-				$this->servicesMethods[$routeName] = $serviceConfiguration->endpoint.$routePath;
+			foreach($serviceConfiguration['routes'] as $routeName => $routeConfig) {
+				$routeConfig['url'] = $serviceConfiguration['endpoint'].$routeConfig['path'];
+				$this->servicesMethods[$routeName] = $routeConfig;
 			}
 		}
 	}
