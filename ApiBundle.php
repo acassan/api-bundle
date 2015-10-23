@@ -5,10 +5,10 @@ namespace ApiBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * Class WorkerBundle
+ * Class ApiBundle
  * @package ApiBundle
  */
-Class WorkerBundle extends Bundle
+Class ApiBundle extends Bundle
 {
 
 }
