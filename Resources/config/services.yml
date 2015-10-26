@@ -1,7 +1,7 @@
 parameters:
-    api.dispatcher.endpoint:  ~
+    api.serverregistry.endpoint:  ~
 
 services:
-    dispatcher.api:
+    api.serverregistry:
         class: ApiBundle\Api\Api
-        arguments: [ '%api.dispatcher.endpoint%' ]
+        arguments: [ '%serverregistry.api.endpoint%' ]
