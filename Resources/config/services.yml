@@ -1,7 +1,7 @@
 parameters:
-    serverregistry.api.endpoint:  ~
+    api.serverregistry.endpoint:  ~
 
 services:
-    serverregistry.api:
+    api.serverregistry:
         class: ApiBundle\Api\Api
         arguments: [ '%serverregistry.api.endpoint%' ]
