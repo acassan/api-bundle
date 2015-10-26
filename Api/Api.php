@@ -94,7 +94,11 @@ Class Api
 			case 'GET':
 			case 'PUT':
 				$urlParameters = [];
-				foreach($parameters as $paramName => $paramValue) { $urlParameters[] = sprintf("%s=%s", $paramName, urlencode($paramValue)); }
+				foreach($parameters as $paramName => $paramValue) {
+					if(!is_null($paramValue)) {
+						$urlParameters[] = sprintf("%s=%s", $paramName, urlencode($paramValue));
+					}
+				}
 				$url .= '?'.implode('&', $urlParameters);
 				$parameters = [];
 				break;
