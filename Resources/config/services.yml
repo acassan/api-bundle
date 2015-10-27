@@ -4,4 +4,4 @@ parameters:
 services:
     api.serverregistry:
         class: ApiBundle\Api\Api
-        arguments: [ '%serverregistry.api.endpoint%' ]
+        arguments: [ '%api.serverregistry.endpoint%' ]
