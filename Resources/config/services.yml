@@ -5,3 +5,7 @@ services:
     api.serverregistry:
         class: ApiBundle\Api\Api
         arguments: [ '%api.serverregistry.endpoint%' ]
+
+    api.dispatcher:
+        class: ApiBundle\Dispatcher\DispatcherManager
+
