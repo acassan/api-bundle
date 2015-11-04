@@ -3,6 +3,7 @@
 namespace ApiBundle;
 
 use ModelBundle\DependencyInjection\Compiler\DispatcherCompilerPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
