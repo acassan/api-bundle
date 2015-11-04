@@ -3,8 +3,6 @@
 namespace ApiBundle\Api;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 /**
@@ -52,8 +50,7 @@ Class Api
 	{
 		$path 		= "/services.json";
 		$url 		= $this->endpoint.$path;
-		$response  	= $this->call($url);
-		$services 	= json_decode($response->getBody()->getContents(), true);
+		$services  	= $this->call($url);
 
 		return $services;
 	}
@@ -71,11 +68,11 @@ Class Api
 	}
 
 	/**
-	 * @param $url
-	 * @param array $parameters
+	 * @param        $url
+	 * @param array  $parameters
 	 * @param string $method
-	 * @param bool|false $raw
-	 * @return null|\Psr\Http\Message\ResponseInterface
+	 * @param bool   $raw
+	 * @return mixed|string
 	 * @throws \Exception
 	 */
 	public function call($url, array $parameters = [], $method = 'GET', $raw = false)
@@ -107,28 +104,20 @@ Class Api
 				break;
 		}
 
-		// Try ... Catch block to handle response code 400 set in error by guzzle
-		try {
-			$response 			= $this->getClient()->{$method}($url, ['json' 	=> $parameters]);
-		}
-		catch( RequestException $e) {
+		$response 			= $this->getClient()->{$method}($url, ['form_params' => $parameters]);
+		$responseContent 	= $response->getBody()->getContents();
 
-			// Catch exactly error 400 use
-			if ($e->getResponse()->getStatusCode() == '400') {
-				$response = $e->getResponse();
-			}
-			else {
-				throw $e;
-			}
+		if(!$raw) {
+			$responseContent = json_decode($responseContent, true);
 		}
 
-		return $response;
+		return $responseContent;
 	}
 
 	/**
-	 * @param $routeName
+	 * @param       $routeName
 	 * @param array $parameters
-	 * @return null|\Psr\Http\Message\ResponseInterface
+	 * @return string
 	 * @throws \Exception
 	 */
 	public function callMethod($routeName, array $parameters = [])
@@ -146,12 +135,14 @@ Class Api
 	}
 
 	/**
-	 * @param ResponseInterface $response
-	 * @return array
+	 * @param $routeName
+	 * @return mixed
 	 */
-	public function decodeJsonResponseBody(ResponseInterface $response)
+	private function findMethodInRoute($routeName)
 	{
-		return json_decode($response->getBody()->getContents(), true);
+		$routeExploded = explode("_", $routeName);
+
+		return $routeExploded[0];
 	}
 
 	/**
