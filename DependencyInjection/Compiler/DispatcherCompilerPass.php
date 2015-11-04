@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\DependencyInjection\Compiler;
+namespace ApiBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
