@@ -2,6 +2,8 @@
 
 namespace ApiBundle\Controller;
 
+use ApiBundle\Dispatcher\DispatcherEntryEvent;
+use ApiBundle\Dispatcher\DispatcherEventName;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -33,7 +35,10 @@ class DispatcherController extends Controller
 			throw new InvalidArgumentException("Missing eventValue parameter");
 		}
 
-		$this->get('api.dispatcher')->dispatch($request->get('eventKey'), $request->get('eventValue'));
+		$eventkey 	= $request->get('eventKey');
+		$eventvalue = $request->get('eventValue');
+
+		$this->get('event_dispatcher')->dispatch(DispatcherEventName::API_DISPATCHER_ENTRY, new DispatcherEntryEvent($eventkey, $eventvalue));
 
 		return new JsonResponse();
     }
