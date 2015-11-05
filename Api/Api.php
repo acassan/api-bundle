@@ -2,6 +2,9 @@
 
 namespace ApiBundle\Api;
 
+use ApiBundle\Model\ServiceConfiguration;
+use ApiBundle\Model\ServiceRouteConfiguration;
+use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
@@ -22,14 +25,9 @@ Class Api
 	private $client;
 
 	/**
-	 * @var array
+	 * @var ArrayCollection|ServiceConfiguration[]
 	 */
 	private $services;
-
-	/**
-	 * @var array
-	 */
-	private $servicesMethods;
 
 	/**
 	 * @param $endpoint
@@ -37,22 +35,18 @@ Class Api
 	public function __construct($endpoint)
 	{
 		$this->endpoint = $endpoint;
+		$this->services = new ArrayCollection();
 
-		// TO REMOVE
+		// Load service from registry only once
 		$this->loadServices();
 	}
 
 	/**
-	 * @return mixed|string
-	 * @throws \Exception
+	 * @return \ApiBundle\Model\ServiceConfiguration[]|ArrayCollection
 	 */
 	public function getServices()
 	{
-		$path 		= "/services.json";
-		$url 		= $this->endpoint.$path;
-		$services  	= $this->call($url);
-
-		return $services;
+		return $this->services;
 	}
 
 	/**
@@ -115,6 +109,32 @@ Class Api
 	}
 
 	/**
+	 * @param $serviceName
+	 * @param $routeName
+	 * @param array $parameters
+	 * @return mixed|string
+	 * @throws \Exception
+	 */
+	public function callServiceMethod($serviceName, $routeName, array $parameters = [])
+	{
+		// Check service exists
+		if(!$this->hasService($serviceName)) {
+			throw new \Exception("Service $serviceName not found");
+		}
+
+		$serviceConfig = $this->getService($serviceName);
+
+		// Check service has method
+		if(!$serviceConfig->hasRoute($routeName)) {
+			throw new \Exception("Service $serviceName doesnt have method $routeName");
+		}
+
+		$routeConfig = $serviceConfig->getRoute($routeName);
+
+		return $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
+	}
+
+	/**
 	 * @param       $routeName
 	 * @param array $parameters
 	 * @return string
@@ -122,45 +142,96 @@ Class Api
 	 */
 	public function callMethod($routeName, array $parameters = [])
 	{
-		if(is_null($this->services)) {
-			$this->loadServices();
-		}
-
 		// Check method exists
-		if(!isset($this->servicesMethods[$routeName])) {
+		if(!$this->hasRoute($routeName)) {
 			throw new \Exception("Route $routeName not found in all services configuration");
 		}
 
-		return $this->call($this->servicesMethods[$routeName]['url'], $parameters, $this->servicesMethods[$routeName]['method']);
+		$routeConfig = $this->getRoute($routeName);
+
+		return $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
 	}
 
 	/**
 	 * @param $routeName
-	 * @return mixed
+	 * @return bool
 	 */
-	private function findMethodInRoute($routeName)
+	public function hasRoute($routeName)
 	{
-		$routeExploded = explode("_", $routeName);
+		foreach($this->services as $service) {
+			if($service->hasRoute($routeName)) {
+				return true;
+			}
+		}
 
-		return $routeExploded[0];
+		return false;
 	}
 
 	/**
-	 * Load services from dispatcher
+	 * @param $routeName
+	 * @return ServiceRouteConfiguration|null
+	 */
+	public function getRoute($routeName)
+	{
+		foreach($this->services as $service) {
+			if($service->hasRoute($routeName)) {
+				return $service->getRoute($routeName);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param $serviceName
+	 * @return bool
+	 */
+	public function hasService($serviceName)
+	{
+		foreach($this->services as $service) {
+			if($service->getName() == $serviceName) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param $serviceName
+	 * @return ServiceConfiguration|null
+	 */
+	public function getService($serviceName)
+	{
+		foreach($this->services as $service) {
+			if($service->getName() == $serviceName) {
+				return $service;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Load services from registry
 	 */
 	private function loadServices()
 	{
-		$this->services = [];
+		$path 		= "/services.json";
+		$url 		= $this->endpoint.$path;
+		$services  	= $this->call($url);
 
-		foreach($this->getServices() as $serviceName => $serviceConfiguration) {
+		foreach($services as $serviceName => $serviceConfiguration) {
 			if(!isset($serviceConfiguration['endpoint'])) { continue; }
 
-			$this->services[$serviceName] = $serviceConfiguration;
+			$serviceConfig = new ServiceConfiguration($serviceName, $serviceConfiguration['endpoint']);
 
 			foreach($serviceConfiguration['routes'] as $routeName => $routeConfig) {
-				$routeConfig['url'] = $serviceConfiguration['endpoint'].$routeConfig['path'];
-				$this->servicesMethods[$routeName] = $routeConfig;
+				$serviceRouteconfig = new ServiceRouteConfiguration($serviceConfig->getEndpoint(), $routeName, $routeConfig['path'], $routeConfig['method']);
+				$serviceConfig->addRoute($serviceRouteconfig);
 			}
+
+			$this->services->add($serviceConfig);
 		}
 	}
 }
