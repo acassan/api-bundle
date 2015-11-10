@@ -73,6 +73,7 @@ Class Api
 		if(preg_match_all("/\{([a-z0-9]+)\}/i", $url, $matches)) {
 			// Remove first element of matches
 			array_shift($matches);
+			$matches = current($matches);
 
 			// Replace parameters in url
 			foreach($matches as $urlParameterName) {
