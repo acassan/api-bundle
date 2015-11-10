@@ -112,10 +112,11 @@ Class Api
 	 * @param $serviceName
 	 * @param $routeName
 	 * @param array $parameters
+	 * @param bool|false $raw
 	 * @return mixed|string
 	 * @throws \Exception
 	 */
-	public function callServiceMethod($serviceName, $routeName, array $parameters = [])
+	public function callServiceMethod($serviceName, $routeName, array $parameters = [], $raw = false)
 	{
 		// Check service exists
 		if(!$this->hasService($serviceName)) {
@@ -130,17 +131,23 @@ Class Api
 		}
 
 		$routeConfig = $serviceConfig->getRoute($routeName);
+		$response 	 = $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
 
-		return $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
+		if(!$raw) {
+			$response = json_decode($response->getBody()->getContents(), true);
+		}
+
+		return $response;
 	}
 
 	/**
-	 * @param       $routeName
+	 * @param $routeName
 	 * @param array $parameters
-	 * @return string
+	 * @param bool|false $raw
+	 * @return mixed|string
 	 * @throws \Exception
 	 */
-	public function callMethod($routeName, array $parameters = [])
+	public function callMethod($routeName, array $parameters = [], $raw = false)
 	{
 		// Check method exists
 		if(!$this->hasRoute($routeName)) {
@@ -148,8 +155,13 @@ Class Api
 		}
 
 		$routeConfig = $this->getRoute($routeName);
+		$response	 = $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
 
-		return $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
+		if(!$raw) {
+			$response = json_decode($response->getBody()->getContents(), true);
+		}
+
+		return $response;
 	}
 
 	/**
