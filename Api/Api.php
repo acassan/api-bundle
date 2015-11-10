@@ -6,7 +6,6 @@ use ApiBundle\Model\ServiceConfiguration;
 use ApiBundle\Model\ServiceRouteConfiguration;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 /**
  * Class Api
