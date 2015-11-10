@@ -70,7 +70,7 @@ Class Api
 	 */
 	public function call($url, array $parameters = [], $method = 'GET')
 	{
-		if(preg_match("/\{([a-z0-9]+)\}/i", $url, $matches)) {
+		if(preg_match_all("/\{([a-z0-9]+)\}/i", $url, $matches)) {
 			// Remove first element of matches
 			array_shift($matches);
 
@@ -97,7 +97,7 @@ Class Api
 				break;
 		}
 
-		$response 			= $this->getClient()->{$method}($url, ['form_params' => $parameters]);
+		$response 			= $this->getClient()->{$method}($url, ['json' => $parameters]);
 
 		return $response;
 	}
