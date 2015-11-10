@@ -62,14 +62,13 @@ Class Api
 	}
 
 	/**
-	 * @param        $url
-	 * @param array  $parameters
+	 * @param $url
+	 * @param array $parameters
 	 * @param string $method
-	 * @param bool   $raw
-	 * @return mixed|string
+	 * @return mixed
 	 * @throws \Exception
 	 */
-	public function call($url, array $parameters = [], $method = 'GET', $raw = false)
+	public function call($url, array $parameters = [], $method = 'GET')
 	{
 		if(preg_match("/\{([a-z0-9]+)\}/i", $url, $matches)) {
 			// Remove first element of matches
@@ -99,24 +98,18 @@ Class Api
 		}
 
 		$response 			= $this->getClient()->{$method}($url, ['form_params' => $parameters]);
-		$responseContent 	= $response->getBody()->getContents();
 
-		if(!$raw) {
-			$responseContent = json_decode($responseContent, true);
-		}
-
-		return $responseContent;
+		return $response;
 	}
 
 	/**
 	 * @param $serviceName
 	 * @param $routeName
 	 * @param array $parameters
-	 * @param bool|false $raw
 	 * @return mixed|string
 	 * @throws \Exception
 	 */
-	public function callServiceMethod($serviceName, $routeName, array $parameters = [], $raw = false)
+	public function callServiceMethod($serviceName, $routeName, array $parameters = [])
 	{
 		// Check service exists
 		if(!$this->hasService($serviceName)) {
@@ -133,21 +126,16 @@ Class Api
 		$routeConfig = $serviceConfig->getRoute($routeName);
 		$response 	 = $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
 
-		if(!$raw) {
-			$response = $this->decodeResponse($response);
-		}
-
 		return $response;
 	}
 
 	/**
 	 * @param $routeName
 	 * @param array $parameters
-	 * @param bool|false $raw
-	 * @return mixed|string
+	 * @return mixed
 	 * @throws \Exception
 	 */
-	public function callMethod($routeName, array $parameters = [], $raw = false)
+	public function callMethod($routeName, array $parameters = [])
 	{
 		// Check method exists
 		if(!$this->hasRoute($routeName)) {
@@ -156,10 +144,6 @@ Class Api
 
 		$routeConfig = $this->getRoute($routeName);
 		$response	 = $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
-
-		if(!$raw) {
-			$response = $this->decodeResponse($response);
-		}
 
 		return $response;
 	}
@@ -240,7 +224,7 @@ Class Api
 	{
 		$path 		= "/services.json";
 		$url 		= $this->endpoint.$path;
-		$services  	= $this->call($url);
+		$services  	= $this->decodeResponse($this->call($url));
 
 		foreach($services as $serviceName => $serviceConfiguration) {
 			if(!isset($serviceConfiguration['endpoint'])) { continue; }
