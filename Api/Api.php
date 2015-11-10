@@ -6,6 +6,7 @@ use ApiBundle\Model\ServiceConfiguration;
 use ApiBundle\Model\ServiceRouteConfiguration;
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class Api
@@ -133,7 +134,7 @@ Class Api
 		$response 	 = $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
 
 		if(!$raw) {
-			$response = json_decode($response->getBody()->getContents(), true);
+			$response = $this->decodeResponse($response);
 		}
 
 		return $response;
@@ -157,10 +158,19 @@ Class Api
 		$response	 = $this->call($routeConfig->getUrl(), $parameters, $routeConfig->getMethod());
 
 		if(!$raw) {
-			$response = json_decode($response->getBody()->getContents(), true);
+			$response = $this->decodeResponse($response);
 		}
 
 		return $response;
+	}
+
+	/**
+	 * @param ResponseInterface $response
+	 * @return array
+	 */
+	public function decodeResponse(ResponseInterface $response)
+	{
+		return json_decode($response->getBody()->getContents(), true);
 	}
 
 	/**
