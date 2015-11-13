@@ -12,7 +12,7 @@ use Psr\Http\Message\ResponseInterface;
  * Class Api
  * @package ApiBundle\Api
  */
-Class Api
+Class RegistryApi
 {
 	/**
 	 * @var string
