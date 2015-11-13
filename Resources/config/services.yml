@@ -1,10 +1,10 @@
 parameters:
-    api.serverregistry.endpoint:  ~
+    api.registry.endpoint:  ~
 
 services:
-    api.serverregistry:
-        class: ApiBundle\Api\Api
-        arguments: [ '%api.serverregistry.endpoint%' ]
+    api.registry:
+        class: ApiBundle\Registry\RegistryApi
+        arguments: [ '%api.registry.endpoint%' ]
 
     api.dispatcher:
         class: ApiBundle\Dispatcher\DispatcherManager

@@ -1,5 +1,5 @@
 <?php
-namespace ApiBundle\Model;
+namespace ApiBundle\Registry\Model;
 
 /**
  * Class ServiceRouteConfiguration

@@ -1,6 +1,5 @@
 <?php
-namespace ApiBundle\Model;
-use Doctrine\Common\Collections\ArrayCollection;
+namespace ApiBundle\Registry\Model;
 
 /**
  * Class ServiceConfiguration
@@ -21,7 +20,7 @@ Final Class ServiceConfiguration
     private $endpoint;
 
     /**
-     * @var ArrayCollection|ServiceRouteConfiguration[]
+     * @var \SplObjectStorage()|ServiceRouteConfiguration[]
      */
     private $routes;
 
@@ -33,7 +32,7 @@ Final Class ServiceConfiguration
     {
         $this->name     = $name;
         $this->endpoint = $endpoint;
-        $this->routes   = new ArrayCollection();
+        $this->routes   = new \SplObjectStorage();
     }
 
     /**
@@ -99,7 +98,7 @@ Final Class ServiceConfiguration
     }
 
     /**
-     * @return ArrayCollection
+     * @return \SplObjectStorage()
      */
     public function getRoutes()
     {
@@ -112,7 +111,7 @@ Final Class ServiceConfiguration
      */
     public function addRoute(ServiceRouteConfiguration $routeConfiguration)
     {
-        $this->routes->add($routeConfiguration);
+        $this->routes->attach($routeConfiguration);
 
         return $this;
     }
@@ -123,7 +122,7 @@ Final Class ServiceConfiguration
      */
     public function removeRoute(ServiceRouteConfiguration $routeConfiguration)
     {
-        $this->routes->removeElement($routeConfiguration);
+        $this->routes->detach($routeConfiguration);
 
         return $this;
     }
