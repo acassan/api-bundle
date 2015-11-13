@@ -91,7 +91,7 @@ Class RegistryApi
 		}
 
 		$ServiceConfig = $this->getService($name);
-		$url = sprintf("%/%", $ServiceConfig->getEndpoint(), $path);
+		$url = sprintf("%s%s", $ServiceConfig->getEndpoint(), $path);
 
 		return $this->call($url, $parameters, $method);
 	}
