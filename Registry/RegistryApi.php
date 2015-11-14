@@ -165,8 +165,8 @@ Class RegistryApi
 				foreach($parameters as $paramName => $paramValue) {
 					if(!is_null($paramValue)) {
 						if(is_array($paramValue)) {
-							foreach($paramValue as $paramKey => $paramVal) {
-								$urlParameters[] = sprintf("%s=%s", $paramKey, urlencode($paramVal));
+							foreach($paramValue as $paramVal) {
+								$urlParameters[] = sprintf("%s[]=%s", $paramName, urlencode($paramVal));
 							}
 						}
 						elseif(is_string($paramValue)) {
