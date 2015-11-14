@@ -164,9 +164,21 @@ Class RegistryApi
 				$urlParameters = [];
 				foreach($parameters as $paramName => $paramValue) {
 					if(!is_null($paramValue)) {
-						$urlParameters[] = sprintf("%s=%s", $paramName, urlencode($paramValue));
+						if(is_array($paramValue)) {
+							foreach($paramValue as $paramKey => $paramVal) {
+								$urlParameters[] = sprintf("%s=%s", $paramKey, urlencode($paramVal));
+							}
+						}
+						elseif(is_string($paramValue)) {
+							$urlParameters[] = sprintf("%s=%s", $paramName, urlencode($paramValue));
+						}
+						else {
+							throw new \Exception(sprintf("Invalid param type '%s'", gettype($paramValue)));
+						}
+
 					}
 				}
+
 				$url .= '?'.implode('&', $urlParameters);
 				$parameters = [];
 				break;
